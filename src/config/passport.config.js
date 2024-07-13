@@ -1,11 +1,26 @@
 import passport from "passport";
 import local from "passport-local";
 import google from "passport-google-oauth20";
+import jwt from "passport-jwt";
+import envs from "./env.config.js"
 import { createHash, isValidPassword } from "../utils/hashPassword.js";
 import userDao from "../dao/mongoDao/user.dao.js";
 
 const LocalStrategy = local.Strategy;
 const GoogleStrategy = google.Strategy;
+const JWTStrategy = jwt.Strategy;
+const ExtractJWT = jwt.ExtractJwt;
+
+const cookieExtracto = (req) => {
+  let token = null;
+
+  if (req && req.cookies) {
+    token = req.cookies.token;
+  }
+
+  return token;
+};
+
 
 const initializePassport = () => {
 
@@ -16,7 +31,7 @@ const initializePassport = () => {
 
       async (req, username, password, done) => {
         try {
-          const { first_name, last_name, email, age } = req.body;
+          const { first_name, last_name, email, age, role } = req.body;
           const user = await userDao.getByEmail(username);
           if (user) return done(null, false, { message: "El usuario ya existe" });
 
@@ -26,6 +41,7 @@ const initializePassport = () => {
             email,
             age,
             password: createHash(password),
+            role
           };
 
           const createUser = await userDao.create(newUser);
@@ -56,10 +72,9 @@ const initializePassport = () => {
     "google",
     new GoogleStrategy(
       {
-        clientID: "",
-        clientSecret: "",
+        clientID: envs.GOOGLE_CLIENT_ID,
+        clientSecret: envs.GOOGLE_CLIENT_SECRET,
         callbackURL: "http://localhost:8081/api/session/google",
-
       },
       async (accessToken, refreshToken, profile, cb) => {
         try {
@@ -83,6 +98,22 @@ const initializePassport = () => {
     )
   );
 
+  passport.use(
+    "jwt",
+    new JWTStrategy(
+      {
+        jwtFromRequest: ExtractJWT.fromExtractors([cookieExtracto]),
+        secretOrKey: envs.CODE_SECRET,
+      },
+      async (jwt_payload, done) => {
+        try {
+          return done(null, jwt_payload);
+        } catch (error) {
+          return done(error);
+        }
+      }
+    )
+  );
 
   passport.serializeUser((user, done) => {
     done(null, user._id);

@@ -1,5 +1,7 @@
 import { Router } from "express";
 import productDao from "../dao/mongoDao/product.dao.js";
+import { authorization, passportCall } from "../middlewares/passport.middleware.js";
+import { productDataValidator } from "../validators/productData.validator.js";
 
 const router = Router();
 router.get("/", async (req, res) => {
@@ -47,7 +49,7 @@ router.get("/:pid", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", passportCall("jwt"), authorization("admin"), productDataValidator, async (req, res) => {
   try {
     const product = req.body;
     const newProduct = await productDao.create(product);
@@ -59,7 +61,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:pid", async (req, res) => {
+router.put("/:pid", passportCall("jwt"), authorization("admin"), async (req, res) => {
   try {
     const { pid } = req.params;
     const productData = req.body;
@@ -74,7 +76,7 @@ router.put("/:pid", async (req, res) => {
   }
 });
 
-router.delete("/:pid", async (req, res) => {
+router.delete("/:pid", passportCall("jwt"), authorization("admin"), async (req, res) => {
   try {
     const { pid } = req.params;
     const product = await productDao.deleteOne(pid);

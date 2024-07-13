@@ -3,10 +3,12 @@ import passport from "passport";
 import userDao from "../dao/mongoDao/user.dao.js";
 import { createToken, verifyToken } from "../utils/jwt.js";
 import { isValidPassword } from "../utils/hashPassword.js";
+import { authorization, passportCall } from "../middlewares/passport.middleware.js";
+import { userLoginValidator } from "../validators/userLogin.validator.js";
 
 const router = Router();
 
-router.post("/register", passport.authenticate("register"), async (req, res) => {
+router.post("/register", passportCall("register"), async (req, res) => {
   try {
     res.status(201).json({ status: "success", msg: "Usuario Creado" });
   } catch (error) {
@@ -24,7 +26,7 @@ router.post("/login", passport.authenticate("login"), async (req, res) => {
   }
 });
 
-router.post("/jwt", async (req, res) => {
+router.post("/jwt", userLoginValidator, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -41,13 +43,10 @@ router.post("/jwt", async (req, res) => {
   }
 });
 
-router.get("/current", (req, res) => {
+router.get("/current", passportCall("jwt"), authorization("user"), (req, res) => {
   try {
-    const token = req.cookies.token;
-    const checkToken = verifyToken(token);
-    if (!checkToken) return res.status(403).json({ status: "error", msg: "Invalid token" });
-
-    return res.status(200).json({ status: "success", payload: checkToken });
+  
+    return res.status(200).json({ status: "success", payload: req.user });
   } catch (error) {
     console.log(error);
     res.status(500).json({ status: "Error", msg: "Internal Server Error" });
