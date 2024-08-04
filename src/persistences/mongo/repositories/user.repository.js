@@ -1,7 +1,7 @@
 import { userModel } from "../models/user.model.js";
 
-const getAll = async () => {
-  const users = await userModel.find();
+const getAll = async (query, options) => {
+  const users = await userModel.paginate(query, options);
   return users;
 };
 
@@ -21,8 +21,7 @@ const create = async (data) => {
 };
 
 const update = async (id, data) => {
-  await userModel.findByIdAndUpdate(id, data);
-  const user = await userModel.findById(id);
+  const user = await userModel.findByIdAndUpdate(id, data, { new: true });
   return user;
 };
 
@@ -35,8 +34,8 @@ const deleteOne = async (id) => {
 export default {
   getAll,
   getById,
-  create,
   update,
   deleteOne,
+  create,
   getByEmail
 };

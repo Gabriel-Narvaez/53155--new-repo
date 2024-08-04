@@ -1,59 +1,49 @@
-import cartDao from "../dao/mongoDao/cart.dao.js";
-import productDao from "../dao/mongoDao/product.dao.js";
+import cartsRepository from "../persistences/mongo/repositories/carts.repository.js";
+import productsRepository from "../persistences/mongo/repositories/products.repository.js";
 
 const createCart = async () => {
-  return await cartDao.create();
+  return await cartsRepository.create();
 };
 
 const addProductToCart = async (cid, pid) => {
-  // Verificamos si existe el producto y el carrito
-  await checkProductAndCart(cid, pid);
-  const productInCart = await cartDao.update({ _id: cid, "products.product": pid }, { $inc: { "products.$.quantity": 1 } });
-  /* 
-  $inc: Este es el operador de incremento. Se utiliza para incrementar el valor de un campo numérico en la cantidad especificada.
-  "products.$.quantity": 
-  products: es el nombre del array 
-  $:  es el operador de posición. Representa el primer elemento del array que coincide con la condición especificada 
-  en el filtro de la consulta. Básicamente, este operador selecciona el elemento correcto del array para la actualización.
-  quantity: es el campo del objeto dentro del array products cuyo valor queremos incrementar.
-  */
-
-  if (!productInCart) {
-    return await cartDao.update({ _id: cid }, { $push: { products: { product: pid, quantity: 1 } } });
-  }
-
-  return productInCart;
+  return await cartsRepository.addProductToCart(cid, pid);
 };
 
 const updateQuantityProductInCart = async (cid, pid, quantity) => {
-  await checkProductAndCart(cid, pid);
-  return await cartDao.update({ _id: cid, "products.product": pid }, { $set: { "products.$.quantity": quantity } });
+  return await cartsRepository.updateQuantityProductInCart(cid, pid, quantity);
 };
 
 const deleteProductInCart = async (cid, pid) => {
-  await checkProductAndCart(cid, pid);
-
-  return await cartDao.update({ _id: cid, "products.product": pid }, { $inc: { "products.$.quantity": -1 } });
+  return await cartsRepository.deleteProductInCart(cid, pid);
 };
 
 const getCartById = async (id) => {
-  return await cartDao.getById(id);
-};
-
-const updateCart = async (query, data) => {
-  return await cartDao.update(query, data);
+  return await cartsRepository.getById(id);
 };
 
 const deleteAllProductsInCart = async (cid) => {
-  return await cartDao.update({ _id: cid }, { $set: { product: [] } });
+  return await cartsRepository.deleteAllProductsInCart(cid);
 };
 
-const checkProductAndCart = async (cid, pid) => {
-  const product = await productDao.getById(pid);
-  if (!product) return { product: false };
-  const cart = await cartDao.getById(cid);
-  if (!cart) return { cart: false };
-};
+const purchaseCart = async (cid) => {
+    const cart = await cartsRepository.getById(cid);
+    let total = 0;
+    const products = [];
+
+    for( const product of cart.products) {
+        const prod = await productsRepository.getById(product.product);
+        if(prod.stock >= product.quantity) {
+          total += prod.price * product.quantity;
+        } else {
+          products.push(product)
+        }
+         
+        // Modificar los productos del carrito
+        await cartsRepository.updateCart(cid, products);
+    }
+
+    return total;
+}
 
 export default {
   createCart,
@@ -61,6 +51,6 @@ export default {
   updateQuantityProductInCart,
   deleteProductInCart,
   getCartById,
-  updateCart,
   deleteAllProductsInCart,
+  purchaseCart
 };

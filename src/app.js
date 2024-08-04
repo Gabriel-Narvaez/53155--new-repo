@@ -7,6 +7,7 @@ import passport from "passport";
 import initializePassport from "./config/passport.config.js";
 import cookieParser from "cookie-parser";
 import envs from "./config/env.config.js";
+import { errorHandle } from "./errors/errorHandle.js";
 
 connectMongoDB();
 
@@ -32,6 +33,8 @@ initializePassport();
 
 
 app.use("/api", router);
+
+app.use(errorHandle);
 
 app.listen(envs.PORT, () => {
   console.log(`Escuchando el servidor en el puerto ${envs.PORT}`);
