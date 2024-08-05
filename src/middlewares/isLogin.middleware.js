@@ -1,11 +1,15 @@
+
 import { request, response } from "express";
+import error from "../errors/customErrors.js";
 
 export const isLogin = async (req = request, res = response, next) => {
-
-  if(req.session.user) {
-    next();
-  } else {
-    res.status(401).json({ status: "Error", msg: "Usuario no logueado"});
+  try {
+    if (req.session.user) {
+      next();
+    } else {
+      throw error.unauthorizedError("Usuario no logueado");
+    }
+  } catch (err) {
+    next(err);
   }
-  
-}
+};

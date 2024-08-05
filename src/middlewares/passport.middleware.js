@@ -1,11 +1,12 @@
 import { request, response } from "express";
 import passport from "passport";
+import error from "../errors/customErrors.js";
 
 export const passportCall = (strategy) => {
   return async (req = request, res = response, next) => {
-    passport.authenticate(strategy, { session: false }, (error, user, info) => {
-      if (error) return next(error);
-      if (!user) return res.status(401).json({ status: "error", msg: info.message ? info.message : info.toString() });
+    passport.authenticate(strategy, { session: false }, (err, user, info) => {
+      if (err) return next(err);
+      if (!user) return next(error.unauthorizedError(info.message ? info.message : info.toString()));
 
       req.user = user;
 
@@ -16,9 +17,13 @@ export const passportCall = (strategy) => {
 
 export const authorization = (role) => {
   return async (req = request, res = response, next) => {
-    if (!req.user) return res.status(401).json({ status: "error", msg: "No autorizado" });
-    if (req.user.role !== role) return res.status(403).json({ status: "error", msg: "No tienes permiso" });
+    try {
+      if (!req.user) throw error.unauthorizedError("No autorizado");
+      if (req.user.role !== role) throw error.forbiddenError("No tienes permiso");
 
-    next();
+      next();
+    } catch (err) {
+      next(err);
+    }
   };
 };
