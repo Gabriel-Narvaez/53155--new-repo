@@ -27,7 +27,8 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
-    "twilio": "^5.2.2"
+    "twilio": "^5.2.2",
+    "winston": "^3.14.1"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",

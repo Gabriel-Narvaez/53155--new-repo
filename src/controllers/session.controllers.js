@@ -1,13 +1,14 @@
 import { userResponseDto } from "../dto/user-response.dto.js";
 import { createToken } from "../utils/jwt.js";
 import error from "../errors/customErrors.js";
+import { logger } from "../utils/logger.js";
 
 const register = async (req, res, next) => {
   try {
     res.status(201).json({ status: "success", msg: "Usuario Creado" });
   } catch (err) {
-    console.log(err);
-    next(err); // Pasamos el error al middleware de manejo de errores
+    logger.error(err);
+    next(err); 
   }
 };
 
@@ -25,7 +26,7 @@ const login = async (req, res, next) => {
     const userDto = userResponseDto(user);
     return res.status(200).json({ status: "success", payload: userDto, token });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     next(err);
   }
 };
@@ -38,7 +39,7 @@ const current = (req, res, next) => {
 
     return res.status(200).json({ status: "success", payload: req.user });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     next(err);
   }
 };
@@ -51,7 +52,7 @@ const loginGoogle = async (req, res, next) => {
 
     return res.status(200).json({ status: "success", payload: req.user });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     next(err);
   }
 };
@@ -66,7 +67,7 @@ const logout = async (req, res, next) => {
       res.status(200).json({ status: "success", msg: "Sesión cerrada con éxito" });
     });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     next(err);
   }
 };

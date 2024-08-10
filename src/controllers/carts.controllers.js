@@ -1,14 +1,15 @@
 import cartsServices from "../services/carts.services.js";
 import ticketServices from "../services/ticket.services.js";
 import error from "../errors/customErrors.js";
+import { logger } from "../utils/logger.js";
 
 const createCart = async (req, res, next) => {
   try {
     const cart = await cartsServices.createCart();
     res.status(201).json({ status: "success", payload: cart });
   } catch (err) {
-    console.log(err);
-    next(err); // Pasamos el error al middleware de manejo de errores
+    logger.error(err);
+    next(err); 
   }
 };
 
@@ -18,7 +19,7 @@ const addProductToCart = async (req, res, next) => {
     const cart = await cartsServices.addProductToCart(cid, pid);
     res.status(200).json({ status: "success", payload: cart });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     next(err);
   }
 };
@@ -40,7 +41,7 @@ const updateQuantityProductInCart = async (req, res, next) => {
 
     res.status(200).json({ status: "success", payload: cart });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     next(err);
   }
 };
@@ -56,7 +57,7 @@ const deleteProductInCart = async (req, res, next) => {
 
     res.status(200).json({ status: "success", payload: cart });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     next(err);
   }
 };
@@ -72,7 +73,7 @@ const getCartById = async (req, res, next) => {
 
     res.status(200).json({ status: "success", payload: cart });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     next(err);
   }
 };
@@ -89,7 +90,7 @@ const deleteAllProductsInCart = async (req, res, next) => {
 
     res.status(200).json({ status: "success", payload: cart });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     next(err);
   }
 };
@@ -115,7 +116,7 @@ const purchaseCart = async (req, res, next) => {
 
     res.status(200).json({ status: "success", payload: ticket });
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     next(err);
   }
 };

@@ -1,5 +1,6 @@
 import productsServices from "../services/products.services.js";
 import error from "../errors/customErrors.js";
+import { logger } from "../utils/logger.js";
 
 const getAll = async (req, res, next) => {
   try {
@@ -29,9 +30,9 @@ const getAll = async (req, res, next) => {
     const products = await productsServices.getAll({}, options);
 
     res.status(200).json({ status: "success", products });
-  } catch (error) {
-    console.log(error);
-    next(error);
+  } catch (err) {
+    logger.error(err);
+    next(err);
   }
 };
 
@@ -45,9 +46,9 @@ const getById = async (req, res, next) => {
     }
 
     res.status(200).json({ status: "success", payload: product });
-  } catch (error) {
-    console.log(error);
-    next(error);
+  } catch (err) {
+    logger.error(err);
+    next(err);
   }
 };
 
@@ -62,9 +63,9 @@ const create = async (req, res, next) => {
     const newProduct = await productsServices.create(product);
 
     res.status(201).json({ status: "success", payload: newProduct });
-  } catch (error) {
-    console.log(error);
-    next(error);
+  } catch (err) {
+    logger.error(err);
+    next(err);
   }
 };
 
@@ -84,9 +85,9 @@ const update = async (req, res, next) => {
     }
 
     res.status(200).json({ status: "success", payload: updateProduct });
-  } catch (error) {
-    console.log(error);
-    next(error);
+  } catch (err) {
+    logger.error(err);
+    next(err);
   }
 };
 
@@ -100,9 +101,9 @@ const deleteOne = async (req, res, next) => {
     }
 
     res.status(200).json({ status: "success", payload: "Producto eliminado" });
-  } catch (error) {
-    console.log(error);
-    next(error);
+  } catch (err) {
+    logger.error(err);
+    next(err);
   }
 };
 
